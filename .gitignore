@@ -1,0 +1,53 @@
+## Build artifacts
+bin/
+obj/
+out/
+
+## User-specific files
+*.user
+*.suo
+*.tmp
+*.cache
+*.log
+
+## IDE specific
+.vs/
+.vscode/
+*.code-workspace
+
+## OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+## NuGet
+*.nupkg
+*.snupkg
+packages/
+project.lock.json
+
+## EF Design cache
+*.ide
+
+## Logs
+logs/
+
+## gRPC generated artifacts
+**/*.marker
+**/GeneratedGrpc/
+
+## Docker volumes
+mysql_data/
+
+## Test output
+TestResults/
+*.trx
+*.coverage*
+*.cov
+
+## Node modules (por si en el futuro agregas UI)
+node_modules/
+
+## IGNORE ENV FILES (importante)
+.env
+.env.*
