@@ -5,28 +5,42 @@ using users_service.src.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 
+// --- CRÍTICO: ARREGLO PARA CIERRE INMEDIATO (INOTIFY) ---
+// Se crea el builder con opciones explícitas para evitar errores de monitoreo de archivos.
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    // Asegura que no se monitoreen archivos de configuración que causan el error de 'inotify'
+    ContentRootPath = Directory.GetCurrentDirectory() 
+});
 
-var builder = WebApplication.CreateBuilder(args);
+// Opcional: Asegurarse de que el appsettings.json no se recargue, aunque el constructor anterior ya ayuda mucho.
+builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
+
+
+// --- 1. CONFIGURACIÓN DE SERVICIOS ---
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
+        // Esto soluciona el problema de mayúsculas/minúsculas (PascalCase -> camelCase)
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     }); 
+    
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IUserService, UserService>(); 
 
-// AÑADIDO: Configuración de CORS
+// Configuración de CORS (Permisiva para Desarrollo/Taller)
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
         policy =>
         {
             policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
         });
 });
 
@@ -35,15 +49,15 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// CRÍTICO: Mover Swagger y SwaggerUI FUERA del condicional de desarrollo
-// Esto fuerza la habilitación en Render (Producción)
+// CRÍTICO: Habilitar Swagger en producción (Render)
 app.UseSwagger();
 app.UseSwaggerUI(); 
 
-// AÑADIDO: Habilitar la política CORS
+// Habilitar la política CORS
 app.UseCors();
 
-app.UseHttpsRedirection(); 
+// OPCIONAL: Comentar para evitar el warning 'Failed to determine the https port' en Render
+// app.UseHttpsRedirection(); 
 
 app.MapControllers(); 
 
