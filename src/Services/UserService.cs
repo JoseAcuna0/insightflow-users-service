@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace users_service.src.Services
 {
     public class UserService : IUserService
     {
+    
 
         private readonly List<User> _users = new();
 
@@ -22,6 +24,7 @@ namespace users_service.src.Services
 
         private void SeedInitialData()
         {
+            // --- USUARIOS DEL SEEDER ---
             
             _users.Add(new User
             {
@@ -49,8 +52,7 @@ namespace users_service.src.Services
                 UserStatus = true
             });
             
-
-             _users.Add(new User
+            _users.Add(new User
             {
                 Id = Guid.NewGuid(),
                 FullName = "Neymar Junior",
@@ -86,7 +88,6 @@ namespace users_service.src.Services
             var userResponseDto = UserMapper.ToResponseDto(newUser);
 
             return Task.FromResult(userResponseDto);
-
         }
 
         public Task<UserResponseDto> GetUserByIdAsync(Guid userId)
@@ -111,7 +112,7 @@ namespace users_service.src.Services
                 throw new Exception("Usuario no encontrado.");
             }
 
-           
+            
             if (_users.Any(u => u.Username == userUpdateDto.Username && u.Id != userId))
                 throw new Exception("El nombre de usuario ya está en uso por otro cliente.");
 
@@ -143,23 +144,26 @@ namespace users_service.src.Services
             return Task.FromResult(activeUsers);
         }
 
-        public Task<UserResponseDto> AuthenticateUserAsync(string usernameOrEmail, string password)
+        // --- MÉTODO DE AUTENTICACIÓN CORREGIDO ---
+        // CRÍTICO: Ahora recibe el DTO completo.
+        public Task<UserResponseDto> AuthenticateUserAsync(LoginUserDto dto)
         {
+            // El campo 'Identifier' en el DTO C# debe coincidir con el JSON 'identifier' de React.
             
             var user = _users.FirstOrDefault(u => 
-                (u.Username.Equals(usernameOrEmail, StringComparison.OrdinalIgnoreCase) || 
-                u.Email.Equals(usernameOrEmail, StringComparison.OrdinalIgnoreCase)) 
+                (u.Username.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase) || // Usa dto.Identifier
+                u.Email.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase))       // Usa dto.Identifier
                 && u.UserStatus);
 
             
             if (user == null)
             {
-                
                 throw new Exception("Credenciales incorrectas.");
             }
 
             
-            if (user.Password != password)
+            // Verificación de contraseña de texto simple
+            if (user.Password != dto.Password) // Usa dto.Password
             {
                 throw new Exception("Credenciales incorrectas.");
             }

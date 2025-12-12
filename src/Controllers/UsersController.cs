@@ -122,7 +122,7 @@ namespace users_service.src.Controllers
             try
             {
                 // Llama al servicio para autenticar
-                var userDto = await _userService.AuthenticateUserAsync(dto.UsernameOrEmail, dto.Password);
+                var userDto = await _userService.AuthenticateUserAsync(dto);
 
                 // Retorna el usuario autenticado (sin datos sensibles)
                 return Ok(userDto); 

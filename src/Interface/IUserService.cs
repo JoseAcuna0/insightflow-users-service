@@ -18,6 +18,6 @@ namespace users_service.src.Interface
 
         Task<bool> DeleteUserAsync(Guid userId);
 
-        Task<UserResponseDto> AuthenticateUserAsync(string usernameOrEmail, string password);
+        Task<UserResponseDto> AuthenticateUserAsync(LoginUserDto dto);
     }
 }
