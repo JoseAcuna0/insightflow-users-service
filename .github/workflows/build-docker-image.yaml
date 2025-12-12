@@ -26,4 +26,4 @@ jobs:
         with:
           context: "{{defaultContext}}"
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/users-service:latest , ${{ secrets.DOCKER_HUB_USERNAME }}/users-service:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/taller3-backend:latest , ${{ secrets.DOCKER_HUB_USERNAME }}/taller3-backend:${{ github.sha }}
