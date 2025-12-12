@@ -142,6 +142,32 @@ namespace users_service.src.Services
 
             return Task.FromResult(activeUsers);
         }
+
+        public Task<UserResponseDto> AuthenticateUserAsync(string usernameOrEmail, string password)
+        {
+            
+            var user = _users.FirstOrDefault(u => 
+                (u.Username.Equals(usernameOrEmail, StringComparison.OrdinalIgnoreCase) || 
+                u.Email.Equals(usernameOrEmail, StringComparison.OrdinalIgnoreCase)) 
+                && u.UserStatus);
+
+            
+            if (user == null)
+            {
+                
+                throw new Exception("Credenciales incorrectas.");
+            }
+
+            
+            if (user.Password != password)
+            {
+                throw new Exception("Credenciales incorrectas.");
+            }
+            
+            
+            var responseDto = UserMapper.ToResponseDto(user);
+            return Task.FromResult(responseDto);
+        }
         
     }
 }

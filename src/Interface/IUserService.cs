@@ -17,5 +17,7 @@ namespace users_service.src.Interface
         Task<IEnumerable<UserResponseDto>> GetAllUsersAsync();
 
         Task<bool> DeleteUserAsync(Guid userId);
+
+        Task<UserResponseDto> AuthenticateUserAsync(string usernameOrEmail, string password);
     }
 }

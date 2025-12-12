@@ -116,6 +116,23 @@ namespace users_service.src.Controllers
             return NoContent();
         }
 
+        [HttpPost("login")] 
+        public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
+        {
+            try
+            {
+                // Llama al servicio para autenticar
+                var userDto = await _userService.AuthenticateUserAsync(dto.UsernameOrEmail, dto.Password);
+
+                // Retorna el usuario autenticado (sin datos sensibles)
+                return Ok(userDto); 
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(new { message = "Usuario/Email o contraseña incorrectos." });
+            }
+        }
+
 
     }
 }
