@@ -15,5 +15,7 @@ namespace users_service.src.models
         public bool UserStatus { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string Address { get; set; } = string.Empty;
+
+        public string PhoneNumber { get; set; } = string.Empty;
     }
 }

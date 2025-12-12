@@ -17,6 +17,51 @@ namespace users_service.src.Services
         public UserService()
         {
             _users = new List<User>();
+            SeedInitialData();
+        }
+
+        private void SeedInitialData()
+        {
+            
+            _users.Add(new User
+            {
+                Id = Guid.NewGuid(), 
+                FullName = "Administrador InsightFlow",
+                Email = "admin@insightflow.com",
+                Username = "admin",
+                Password = "password123", 
+                DateOfBirth = new DateOnly(1990, 1, 1),
+                Address = "Sede Central, Santiago",
+                PhoneNumber = "987654321",
+                UserStatus = true
+            });
+
+            _users.Add(new User
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Jose Acuña",
+                Email = "j.acuna@ucn.cl",
+                Username = "j_acuna",
+                Password = "test",
+                DateOfBirth = new DateOnly(2003, 5, 10),
+                Address = "Antofagasta, Chile",
+                PhoneNumber = "912345678",
+                UserStatus = true
+            });
+            
+
+             _users.Add(new User
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Neymar Junior",
+                Email = "NeyNey@test.com",
+                Username = "Santos10",
+                Password = "futbol",
+                DateOfBirth = new DateOnly(1980, 12, 12),
+                Address = "Santos, Brasil",
+                PhoneNumber = "900000000",
+                UserStatus = true
+            });
         }
 
         public Task<UserResponseDto> CreateUserAsync(UserCreateDto userCreateDto)
@@ -46,7 +91,7 @@ namespace users_service.src.Services
 
         public Task<UserResponseDto> GetUserByIdAsync(Guid userId)
         {
-            var user = _users.FirstOrDefault(u => u.Id == userId && u.UserStatus);
+            var user = _users.FirstOrDefault(u => u.Id == userId);
             
             if (user == null)
             {
@@ -93,8 +138,7 @@ namespace users_service.src.Services
 
         public Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
-            var activeUsers = _users.Where(u => u.UserStatus)
-                                    .Select(u => UserMapper.ToResponseDto(u));
+            var activeUsers = _users.Select(u => UserMapper.ToResponseDto(u));
 
             return Task.FromResult(activeUsers);
         }
