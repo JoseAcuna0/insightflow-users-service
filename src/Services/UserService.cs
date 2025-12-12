@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +12,12 @@ namespace users_service.src.Services
     public class UserService : IUserService
     {
     
-
         private readonly List<User> _users = new();
 
         public UserService()
         {
-            _users = new List<User>();
+            // Nota: Se ha omitido la línea '_users = new List<User>();' del código original,
+            // ya que la lista se inicializa arriba, pero se mantiene la lógica si es necesaria.
             SeedInitialData();
         }
 
@@ -144,15 +143,14 @@ namespace users_service.src.Services
             return Task.FromResult(activeUsers);
         }
 
-        // --- MÉTODO DE AUTENTICACIÓN CORREGIDO ---
-        // CRÍTICO: Ahora recibe el DTO completo.
+        // --- MÉTODO DE AUTENTICACIÓN CORREGIDO Y FINAL ---
+        // Ahora recibe el DTO completo, lo que soluciona el conflicto de nombres.
         public Task<UserResponseDto> AuthenticateUserAsync(LoginUserDto dto)
         {
-            // El campo 'Identifier' en el DTO C# debe coincidir con el JSON 'identifier' de React.
             
             var user = _users.FirstOrDefault(u => 
-                (u.Username.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase) || // Usa dto.Identifier
-                u.Email.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase))       // Usa dto.Identifier
+                (u.Username.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase) || // Busca por dto.Identifier
+                u.Email.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase))       // Busca por dto.Identifier
                 && u.UserStatus);
 
             
@@ -163,7 +161,7 @@ namespace users_service.src.Services
 
             
             // Verificación de contraseña de texto simple
-            if (user.Password != dto.Password) // Usa dto.Password
+            if (user.Password != dto.Password) 
             {
                 throw new Exception("Credenciales incorrectas.");
             }

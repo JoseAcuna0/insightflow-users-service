@@ -117,18 +117,23 @@ namespace users_service.src.Controllers
         }
 
         [HttpPost("login")] 
-        public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
+        public async Task<IActionResult> Login([FromBody] LoginUserDto dto) // Usa el DTO CORREGIDO
         {
+            if (dto == null || string.IsNullOrEmpty(dto.Identifier) || string.IsNullOrEmpty(dto.Password))
+            {
+                // Se añade un manejo de error temprano si la deserialización falla y los campos son nulos
+                return BadRequest(new { message = "Falta el identificador o la contraseña." });
+            }
+            
             try
             {
-                // Llama al servicio para autenticar
-                var userDto = await _userService.AuthenticateUserAsync(dto);
-
-                // Retorna el usuario autenticado (sin datos sensibles)
+                // Llama al servicio con el DTO
+                var userDto = await _userService.AuthenticateUserAsync(dto); 
                 return Ok(userDto); 
             }
             catch (Exception ex)
             {
+                // Esto es lo que devuelve el error de credenciales
                 return Unauthorized(new { message = "Usuario/Email o contraseña incorrectos." });
             }
         }
