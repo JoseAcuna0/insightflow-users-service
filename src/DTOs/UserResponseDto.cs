@@ -15,7 +15,7 @@ namespace users_service.src.DTOs
 
         public string Username { get; set; } = string.Empty;
 
-        public string UserStatus { get; set; } = string.Empty;
+        public bool UserStatus { get; set; }
 
         public DateOnly DateOfBirth { get; set; }
 

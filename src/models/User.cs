@@ -11,7 +11,7 @@ namespace users_service.src.models
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
-        public string UserStatus { get; set; } = string.Empty;
+        public bool UserStatus { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string Address { get; set; } = string.Empty;
     }
