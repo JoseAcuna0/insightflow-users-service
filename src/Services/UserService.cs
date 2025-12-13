@@ -9,29 +9,45 @@ using users_service.src.models;
 
 namespace users_service.src.Services
 {
+    /// <summary>
+    /// Servicio de lógica de negocio encargado de la gestión de usuarios.
+    /// Implementa la interfaz IUserService y opera sobre una colección
+    /// de usuarios almacenada en memoria.
+    /// </summary>
+    /// <remarks>
+    /// Este servicio utiliza almacenamiento en memoria mediante una lista,
+    /// por lo que los datos se pierden al reiniciar la aplicación.
+    /// Está diseñado para fines académicos y pruebas.
+    /// </remarks>
     public class UserService : IUserService
     {
-    
+        /// <summary>
+        /// Lista en memoria que almacena los usuarios registrados.
+        /// </summary>
         private readonly List<User> _users = new();
 
+        /// <summary>
+        /// Constructor del servicio de usuarios.
+        /// Inicializa la colección y carga datos de ejemplo (seed).
+        /// </summary>
         public UserService()
         {
-            // Nota: Se ha omitido la línea '_users = new List<User>();' del código original,
-            // ya que la lista se inicializa arriba, pero se mantiene la lógica si es necesaria.
             SeedInitialData();
         }
 
+        /// <summary>
+        /// Carga datos iniciales de usuarios en memoria.
+        /// Se utiliza para pruebas y demostraciones del sistema.
+        /// </summary>
         private void SeedInitialData()
         {
-            // --- USUARIOS DEL SEEDER ---
-            
             _users.Add(new User
             {
-                Id = Guid.NewGuid(), 
+                Id = Guid.NewGuid(),
                 FullName = "Administrador InsightFlow",
                 Email = "admin@insightflow.com",
                 Username = "admin",
-                Password = "password123", 
+                Password = "password123",
                 DateOfBirth = new DateOnly(1990, 1, 1),
                 Address = "Sede Central, Santiago",
                 PhoneNumber = "987654321",
@@ -50,7 +66,7 @@ namespace users_service.src.Services
                 PhoneNumber = "912345678",
                 UserStatus = true
             });
-            
+
             _users.Add(new User
             {
                 Id = Guid.NewGuid(),
@@ -65,111 +81,123 @@ namespace users_service.src.Services
             });
         }
 
+        /// <summary>
+        /// Crea un nuevo usuario en el sistema.
+        /// </summary>
+        /// <param name="userCreateDto">DTO con los datos de creación del usuario.</param>
+        /// <returns>DTO con la información del usuario creado.</returns>
+        /// <exception cref="Exception">
+        /// Se lanza si el correo electrónico o nombre de usuario ya existen.
+        /// </exception>
         public Task<UserResponseDto> CreateUserAsync(UserCreateDto userCreateDto)
         {
             var newUser = UserMapper.ToEntity(userCreateDto);
 
             if (_users.Any(u => u.Email == newUser.Email))
-            {
                 throw new Exception("El correo electrónico ya existe.");
-            }
 
             if (_users.Any(u => u.Username == newUser.Username))
-            {
                 throw new Exception("Nombre de usuario ya existe.");
-            }
-            
+
             newUser.Id = Guid.NewGuid();
             newUser.UserStatus = true;
 
             _users.Add(newUser);
 
-            var userResponseDto = UserMapper.ToResponseDto(newUser);
-
-            return Task.FromResult(userResponseDto);
+            return Task.FromResult(UserMapper.ToResponseDto(newUser));
         }
 
+        /// <summary>
+        /// Obtiene un usuario según su identificador único.
+        /// </summary>
+        /// <param name="userId">Identificador GUID del usuario.</param>
+        /// <returns>DTO con los datos del usuario encontrado.</returns>
+        /// <exception cref="Exception">
+        /// Se lanza si el usuario no existe.
+        /// </exception>
         public Task<UserResponseDto> GetUserByIdAsync(Guid userId)
         {
             var user = _users.FirstOrDefault(u => u.Id == userId);
-            
-            if (user == null)
-            {
-                throw new Exception("Usuario no encontrado o inactivo."); 
-            }
 
-            var responseDto = UserMapper.ToResponseDto(user);
-            return Task.FromResult(responseDto);
+            if (user == null)
+                throw new Exception("Usuario no encontrado o inactivo.");
+
+            return Task.FromResult(UserMapper.ToResponseDto(user));
         }
 
+        /// <summary>
+        /// Actualiza los datos básicos de un usuario existente.
+        /// </summary>
+        /// <param name="userId">Identificador del usuario a actualizar.</param>
+        /// <param name="userUpdateDto">DTO con los nuevos datos del usuario.</param>
+        /// <returns>DTO con la información actualizada del usuario.</returns>
+        /// <exception cref="Exception">
+        /// Se lanza si el usuario no existe o el nombre de usuario ya está en uso.
+        /// </exception>
         public Task<UserResponseDto> UpdateUserAsync(Guid userId, UserUpdateDto userUpdateDto)
         {
             var user = _users.FirstOrDefault(u => u.Id == userId && u.UserStatus);
-            
-            if (user == null)
-            {
-                throw new Exception("Usuario no encontrado.");
-            }
 
-            
+            if (user == null)
+                throw new Exception("Usuario no encontrado.");
+
             if (_users.Any(u => u.Username == userUpdateDto.Username && u.Id != userId))
                 throw new Exception("El nombre de usuario ya está en uso por otro cliente.");
 
-            
             user.FullName = userUpdateDto.FullName;
             user.Username = userUpdateDto.Username;
 
-            var responseDto = UserMapper.ToResponseDto(user);
-            return Task.FromResult(responseDto);
+            return Task.FromResult(UserMapper.ToResponseDto(user));
         }
 
+        /// <summary>
+        /// Elimina lógicamente un usuario del sistema.
+        /// </summary>
+        /// <param name="userId">Identificador del usuario.</param>
+        /// <returns>
+        /// True si el usuario fue eliminado correctamente, false si no fue encontrado.
+        /// </returns>
         public Task<bool> DeleteUserAsync(Guid userId)
         {
             var user = _users.FirstOrDefault(u => u.Id == userId && u.UserStatus);
 
             if (user == null)
-            {
                 return Task.FromResult(false);
-            }
 
             user.UserStatus = false;
             return Task.FromResult(true);
         }
 
+        /// <summary>
+        /// Obtiene la lista de todos los usuarios registrados.
+        /// </summary>
+        /// <returns>Colección de usuarios en formato DTO.</returns>
         public Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
-            var activeUsers = _users.Select(u => UserMapper.ToResponseDto(u));
-
-            return Task.FromResult(activeUsers);
+            var users = _users.Select(u => UserMapper.ToResponseDto(u));
+            return Task.FromResult(users);
         }
 
-        // --- MÉTODO DE AUTENTICACIÓN CORREGIDO Y FINAL ---
-        // Ahora recibe el DTO completo, lo que soluciona el conflicto de nombres.
+        /// <summary>
+        /// Autentica un usuario mediante nombre de usuario o correo electrónico
+        /// y contraseña.
+        /// </summary>
+        /// <param name="dto">DTO con credenciales de autenticación.</param>
+        /// <returns>DTO del usuario autenticado.</returns>
+        /// <exception cref="Exception">
+        /// Se lanza si las credenciales son incorrectas.
+        /// </exception>
         public Task<UserResponseDto> AuthenticateUserAsync(LoginUserDto dto)
         {
-            
-            var user = _users.FirstOrDefault(u => 
-                (u.Username.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase) || // Busca por dto.Identifier
-                u.Email.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase))       // Busca por dto.Identifier
-                && u.UserStatus);
+            var user = _users.FirstOrDefault(u =>
+                (u.Username.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase) ||
+                 u.Email.Equals(dto.Identifier, StringComparison.OrdinalIgnoreCase)) &&
+                u.UserStatus);
 
-            
-            if (user == null)
-            {
+            if (user == null || user.Password != dto.Password)
                 throw new Exception("Credenciales incorrectas.");
-            }
 
-            
-            // Verificación de contraseña de texto simple
-            if (user.Password != dto.Password) 
-            {
-                throw new Exception("Credenciales incorrectas.");
-            }
-            
-            
-            var responseDto = UserMapper.ToResponseDto(user);
-            return Task.FromResult(responseDto);
+            return Task.FromResult(UserMapper.ToResponseDto(user));
         }
-        
     }
 }
